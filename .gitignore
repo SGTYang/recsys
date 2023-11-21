@@ -3,7 +3,8 @@ data/image/*
 data/tabula/*
 data/pkl_files/*
 data/weights/*
-data/nn_data/*
+data/nn_data/label/*
+data/nn_data/train/*
 
 # Macbook
 .DS_Store
