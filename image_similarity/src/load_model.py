@@ -47,7 +47,7 @@ def VGG(model_input_shape=(224, 224, 3)):
     model.add(Dropout(0.5))
     model.add(Convolution2D(4096, (1, 1), activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Convolution2D(2622, (1, 1)))
+    model.add(Convolution2D(100, (1, 1)))
     model.add(Flatten())
     model.add(Activation('softmax'))
 

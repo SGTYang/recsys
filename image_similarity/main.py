@@ -16,6 +16,7 @@ from src import load_model, cassandra_api
         # "tlaznd@0801"
 
 #############################
+
 def load(image_file):
     # Read and decode an image file to a uint8 tensor
     image = tf.io.read_file(image_file)
@@ -40,8 +41,7 @@ def normalize(input_image):
     return input_image
 
 def load_image(user_id, image_file):
-    #id = tf.strings.split(image_file, "/")[-1]
-    #id = tf.strings.split(id, ".")[0]
+
     input_image = load(image_file)
     input_image = resize(input_image, 224, 224)
     input_image = normalize(input_image)
@@ -105,6 +105,6 @@ if __name__ == "__main__":
             batch_size=args.batch,
             )
         
-        prep.fit_ipca(feature_vector)
+        # prep.fit_ipca(feature_vector)
         batch_knn = prep.make_batch_knn(feature_vector, args.nearest_neighbors)
         prep.fit_knn(batch_knn, feature_vector, args.top_k)
