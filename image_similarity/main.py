@@ -12,10 +12,6 @@ from src import load_model, cassandra_api
         # run double for loop to calculate profile similarity
         # end of each for loop write similarity results to cassandra db
 
-        # keyspaces
-        # "newnyup@gmail.com"
-        # "tlaznd@0801"
-
 #############################
 
 # This should be mounted s3 PATH
@@ -57,7 +53,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="Train the kc-electra model")
 
     parser.add_argument(
-        "--is-cpu", type=bool, default=True, help="Set CPU, default: True"
+        "--is-cpu", type=bool, default=False, help="Set CPU, default: True"
     )
     # TODO: Set cassandra address
     parser.add_argument(
@@ -104,12 +100,13 @@ if __name__ == "__main__":
     with tf.device(device):
         feature_vector = [[tensor_user_id, VGG(tensor_image)] for tensor_user_id, tensor_image in img_dataset]
 
+        # if n_components is larger than batch_sie raise an error
         prep = Similarity(
-            n_components=100,
-            batch_size=args.batch_size,
+            n_components=min(100, args.batch_size),
             )
         
         prep.fit_ipca(feature_vector)
         batch_knn = prep.make_batch_knn(feature_vector, args.nearest_neighbors)
         user_profile_similarity = prep.fit_knn(batch_knn, feature_vector, args.top_k)
-        print(user_profile_similarity)
+        from pprint import pprint
+        pprint(user_profile_similarity)

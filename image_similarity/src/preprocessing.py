@@ -9,10 +9,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path)
 
 class Similarity(IncrementalPCA):
-    def __init__(self, n_components=None, batch_size=None):
+    def __init__(self, n_components=None):
         super().__init__()
         self.n_components = n_components
-        self.batch_size=batch_size
 
     def fit_ipca(self, X):
         """
