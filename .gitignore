@@ -5,7 +5,7 @@ image_similarity/src/sf-class2-root.crt
 image_similarity/src/vgg_face_weights.h5
 
 # Data files
-data
+data/
 data/image/*
 data/tabula/*
 data/pkl_files/*
