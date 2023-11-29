@@ -47,7 +47,7 @@ class Cassandra:
 
         Return
         ------
-        user_favored_list : Array [[targetname, rating]]
+        user_favored_list : Dict {targetname : rating}
         """
         session = self.cluster.connect()
 
@@ -57,7 +57,7 @@ class Cassandra:
             )
 
         # Results are sorted by Cluster key(rating)
-        user_favored_list = [[targetname, rating] for _, rating, targetname in session.execute(rating_query, [username])]
+        user_favored_list = {targetname : rating for _, rating, targetname in session.execute(rating_query, [username])}
 
         return user_favored_list
 
@@ -72,7 +72,7 @@ class Cassandra:
 
         Return
         ------
-        similar_user : Array [[targetname, rating]]
+        similar_user : Dict {username: [targetname, rating]}
         """
         session = self.cluster.connect()
 
@@ -82,6 +82,6 @@ class Cassandra:
             )
 
         # Results are sorted by Cluster key(rating)
-        similar_user = [[targetname, similarity_score] for _, similarity_score, targetname in session.execute(rating_query, [username])]
+        similar_user = {username : [targetname, similarity_score] for _, similarity_score, targetname in session.execute(rating_query, [username])}
 
         return similar_user

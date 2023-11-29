@@ -2,8 +2,10 @@ import logging
 import argparse
 import tensorflow as tf
 
+from src.load_model import VGG
+from src.cassandra_api import Cassandra
 from src.preprocessing import Similarity
-from src import load_model, cassandra_api
+
 
 #############################
 
@@ -92,10 +94,10 @@ if __name__ == "__main__":
         num_parallel_calls=tf.data.AUTOTUNE
     )
     img_dataset = img_dataset.batch(args.batch_size)
-    VGG = load_model.VGG()
+    vgg = VGG()
 
     with tf.device(device):
-        feature_vector = [[tensor_user_id, VGG(tensor_image)] for tensor_user_id, tensor_image in img_dataset]
+        feature_vector = [[tensor_user_id, vgg(tensor_image)] for tensor_user_id, tensor_image in img_dataset]
 
         # if n_components is larger than batch_sie raise an error
         prep = Similarity(
@@ -107,5 +109,5 @@ if __name__ == "__main__":
         user_profile_similarity = prep.fit_knn(batch_knn, feature_vector, args.top_k)
         
         logging.info("Writing similarity scores to Cassandra")
-        #cassandra_obj = cassandra_api.Cassandra()
-        #cassandra_obj.write_similarity(user_profile_similarity)
+        cassandra_obj = Cassandra()
+        cassandra_obj.write_similarity(user_profile_similarity)
