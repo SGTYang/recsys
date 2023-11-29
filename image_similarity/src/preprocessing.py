@@ -1,6 +1,5 @@
 import os 
 import sys
-import tensorflow as tf
 
 from sklearn.neighbors import NearestNeighbors
 from sklearn.decomposition import IncrementalPCA

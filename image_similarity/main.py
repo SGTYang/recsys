@@ -1,4 +1,3 @@
-import s3fs
 import logging
 import argparse
 import tensorflow as tf
@@ -84,8 +83,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     logging.info(f"Setting Cassandra DB, Address:{args.cassandra_address}, Port:{args.cassandra_port}")
 
-    cassandra_obj = cassandra_api.Cassandra()
-
     device = '/CPU:0' if args.is_cpu else '/GPU:0'
     logging.info(f"Using device {device}")
 
@@ -108,5 +105,7 @@ if __name__ == "__main__":
         prep.fit_ipca(feature_vector)
         batch_knn = prep.make_batch_knn(feature_vector, args.nearest_neighbors)
         user_profile_similarity = prep.fit_knn(batch_knn, feature_vector, args.top_k)
-        from pprint import pprint
-        pprint(user_profile_similarity)
+        
+        logging.info("Writing similarity scores to Cassandra")
+        #cassandra_obj = cassandra_api.Cassandra()
+        #cassandra_obj.write_similarity(user_profile_similarity)

@@ -1,41 +1,25 @@
-import cassandra
 from typing import Union
 from fastapi import FastAPI
 
+from cassandra_api import Cassandra
+
 app = FastAPI()
 
-from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT
-from cassandra.policies import WhiteListRoundRobinPolicy, DowngradingConsistencyRetryPolicy
-from cassandra.query import tuple_factory
-from cassandra.query import ConsistencyLevel
-
-profile = ExecutionProfile(
-    load_balancing_policy=WhiteListRoundRobinPolicy(["61.80.148.154"]),
-    retry_policy=DowngradingConsistencyRetryPolicy(),
-    consistency_level=ConsistencyLevel.LOCAL_QUORUM,
-    serial_consistency_level=ConsistencyLevel.LOCAL_SERIAL,
-    request_timeout=15,
-    row_factory=tuple_factory
-)
-
 TOP_N = 10
-cluster = Cluster(["61.80.148.154"], port=30003, execution_profiles={EXEC_PROFILE_DEFAULT : profile})
 
-@app.get("/recommender/{user_id}")
-async def get_recommends(user_id: str):
+@app.get("/recommender/{username}")
+async def get_recommends(username: str):
     res = []
+    cassandra_obj = Cassandra()
+    
+    user_rating_hist = cassandra_obj.load_rating(username)
 
-    session = cluster.connect()
-    
-    # rating_test table's scheme : user_id, rating, target_id
-    rating_query = session.prepare("SELECT * FROM user_profile_test.rating_test WHERE user_id=?")
-    
-    # Results are sorted by Cluster key(rating)
-    user_favored_list = [target_id for _, _, target_id in session.execute(rating_query, [int(user_id)])]
+    # Calculate score here
+    user_rating_hist[:min(len(user_rating_hist), 5)]
     
     # similarity_test table's scheme : user_id, similarity, target_id
     similarity_query = "SELECT * FROM user_profile_test.similarity_test WHERE user_id=%s"
-    similarity_query_futures = [session.execute_async(similarity_query, [target_id]) for target_id in user_favored_list[:min(len(user_favored_list), 5)]]
+    similarity_query_futures = [session.execute_async(similarity_query, [target_id]) for target_id in user_rating_hist[:min(len(user_rating_hist), 5)]]
 
     # wait for them to complete and use the results
     for future in similarity_query_futures:

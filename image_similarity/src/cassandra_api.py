@@ -36,16 +36,28 @@ class Cassandra:
             execution_profiles={EXEC_PROFILE_DEFAULT:profile},
             )
 
-    def write_all_image_similarity(self):
+    def write_similarity(self, data):
         """
-        Load all user_id with user profile image path
+        Write similarity score to Cassandra
         
-        Return: List[user_id, image_path]
+        Parameters
+        ----------
+        data : Dict, {username : {targetname : similarity_score}}
+
+        Return
+        ------
+        None
         """
-        res = []
-        session = self.cluster.connect()
-        rows = session.execute('select * from member.info')
+        try:
+            session = self.cluster.connect()
+            for user in data.keys():
+                user_similarity_stmt = session.prepare(
+                    f"INSERT INTO member.imgsimilarity (username, similarity_score, targetname) VALUES (?, ?, ?)"
+                )
+                for similarity_score, targetname in data[user]:
+                    session.execute(user_similarity_stmt, [user, similarity_score, targetname])
 
-        all_img_path = [row.photo for row in rows]
+        except Exception as e:
+            print(e)
 
-        return all_img_path
+        return 
