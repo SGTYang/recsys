@@ -50,7 +50,9 @@ class Cassandra:
         """
         try:
             session = self.cluster.connect()
+
             for user in data.keys():
+                session.execute(f"SELECT * FROM member.filter WHERE username ={user}")
                 user_similarity_stmt = session.prepare(
                     f"INSERT INTO member.imgsimilarity (username, similarity_score, targetname) VALUES (?, ?, ?)"
                 )
